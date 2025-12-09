@@ -25,8 +25,8 @@ def get_cookies_opts():
     """获取 cookies 配置选项"""
     opts = {}
     
-    # 优先使用 cookies 文件
-    if os.path.exists(COOKIES_FILE):
+    # 优先使用 cookies 文件（必须是文件而非目录）
+    if os.path.isfile(COOKIES_FILE):
         opts['cookiefile'] = COOKIES_FILE
         return opts
     
