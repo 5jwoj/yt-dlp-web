@@ -1,0 +1,16 @@
+services:
+  yt-dlp-web:
+    build: .
+    container_name: yt-dlp-web
+    ports:
+      - "5000:5000"
+    volumes:
+      # 持久化下载文件
+      - ./downloads:/app/downloads
+    environment:
+      - PORT=5000
+      - DEBUG=false
+      # 如需代理，取消下面的注释
+      # - HTTP_PROXY=http://your-proxy:port
+      # - HTTPS_PROXY=http://your-proxy:port
+    restart: unless-stopped

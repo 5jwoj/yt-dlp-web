@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yt-dlp Web 视频下载器</title>
+    <meta name="description" content="基于 yt-dlp 的 Web 视频下载器，支持 YouTube、Bilibili 等多平台视频下载">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1>yt-dlp Web</h1>
+            </div>
+            <p class="subtitle">支持 YouTube、Bilibili 等 1000+ 网站的视频下载</p>
+        </header>
+
+        <!-- 输入区域 -->
+        <section class="input-section glass-card">
+            <div class="input-group">
+                <input type="text" id="url-input" placeholder="粘贴视频链接..." autocomplete="off">
+                <button id="fetch-btn" class="btn btn-primary">
+                    <span class="btn-text">获取信息</span>
+                    <span class="btn-loading" hidden>
+                        <svg class="spinner" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="60" stroke-dashoffset="20"/>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <div class="quick-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="audio-only">
+                    <span class="checkbox-custom"></span>
+                    <span>仅下载音频 (MP3)</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 错误提示 -->
+        <div id="error-message" class="error-message" hidden></div>
+
+        <!-- 视频信息 -->
+        <section id="video-info" class="video-info glass-card" hidden>
+            <div class="video-thumbnail">
+                <img id="video-thumbnail" src="" alt="视频缩略图">
+                <span class="video-duration" id="video-duration"></span>
+            </div>
+            <div class="video-details">
+                <h2 id="video-title" class="video-title"></h2>
+                <p class="video-meta">
+                    <span id="video-uploader"></span>
+                    <span class="separator">•</span>
+                    <span id="video-views"></span>
+                </p>
+                <p id="video-description" class="video-description"></p>
+                
+                <div class="format-selector">
+                    <label for="format-select">选择格式：</label>
+                    <select id="format-select" class="select">
+                        <option value="best">最佳质量</option>
+                    </select>
+                </div>
+                
+                <button id="download-btn" class="btn btn-success btn-large">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>开始下载</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 下载进度 -->
+        <section id="download-progress" class="download-progress glass-card" hidden>
+            <h3>下载进度</h3>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <span id="progress-text" class="progress-text">0%</span>
+            </div>
+            <div class="progress-stats">
+                <span id="progress-speed" class="stat">速度: --</span>
+                <span id="progress-eta" class="stat">剩余: --</span>
+                <span id="progress-size" class="stat">大小: --</span>
+            </div>
+            <div id="progress-status" class="progress-status"></div>
+        </section>
+
+        <!-- 已下载文件 -->
+        <section class="downloads-section glass-card">
+            <div class="section-header">
+                <h3>已下载文件</h3>
+                <button id="refresh-downloads" class="btn btn-ghost btn-small">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M23 4V10H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M20.49 15C19.84 16.86 18.61 18.45 16.98 19.53C15.35 20.62 13.42 21.14 11.47 21.02C9.52 20.9 7.67 20.14 6.18 18.85C4.69 17.57 3.65 15.83 3.22 13.91" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M1 20V14H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3.51 9C4.16 7.14 5.39 5.55 7.02 4.47C8.65 3.38 10.58 2.86 12.53 2.98C14.48 3.1 16.33 3.86 17.82 5.15C19.31 6.43 20.35 8.17 20.78 10.09" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="downloads-list" class="downloads-list">
+                <p class="empty-message">暂无下载文件</p>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>Powered by <a href="https://github.com/yt-dlp/yt-dlp" target="_blank">yt-dlp</a></p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
