@@ -122,6 +122,55 @@ $env:HTTPS_PROXY="http://your-proxy:port"
 python app.py
 ```
 
+### YouTube Cookies 配置
+
+> ⚠️ **重要**：由于 YouTube 的反爬虫机制，下载 YouTube 视频需要配置 cookies。
+
+#### 方法一：使用 cookies.txt 文件（推荐）
+
+1. 安装浏览器扩展 [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)（Chrome）或 [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)（Firefox）
+2. 登录 YouTube
+3. 在 YouTube 页面使用扩展导出 cookies
+4. 将导出的文件保存为 `cookies.txt`，放到项目根目录
+
+**Docker 部署时：**
+
+```bash
+# 将 cookies.txt 挂载到容器
+docker run -d \
+  --name yt-dlp-web \
+  -p 5000:5000 \
+  -v $(pwd)/downloads:/app/downloads \
+  -v $(pwd)/cookies.txt:/app/cookies.txt \
+  yt-dlp-web
+```
+
+或编辑 `docker-compose.yml`：
+
+```yaml
+volumes:
+  - ./downloads:/app/downloads
+  - ./cookies.txt:/app/cookies.txt
+```
+
+#### 方法二：自动从浏览器获取
+
+设置环境变量 `COOKIES_FROM_BROWSER` 为浏览器名称：
+
+```bash
+# 支持: chrome, firefox, edge, safari, opera, brave, vivaldi, chromium
+
+# Linux/Mac
+export COOKIES_FROM_BROWSER=chrome
+python app.py
+
+# Windows PowerShell
+$env:COOKIES_FROM_BROWSER="edge"
+python app.py
+```
+
+> ⚠️ 注意：此方法需要关闭浏览器，且可能需要额外安装 `secretstorage`（Linux）或 `keyring`（Mac）。
+
 ## 📁 项目结构
 
 ```

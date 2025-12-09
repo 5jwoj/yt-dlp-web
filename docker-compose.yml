@@ -7,10 +7,15 @@ services:
     volumes:
       # 持久化下载文件
       - ./downloads:/app/downloads
+      # YouTube cookies 文件（解决反爬虫验证）
+      # 请将 cookies.txt 放到项目根目录
+      - ./cookies.txt:/app/cookies.txt:ro
     environment:
       - PORT=5000
       - DEBUG=false
       # 如需代理，取消下面的注释
       # - HTTP_PROXY=http://your-proxy:port
       # - HTTPS_PROXY=http://your-proxy:port
+      # 或者从浏览器获取 cookies（需要浏览器已关闭）
+      # - COOKIES_FROM_BROWSER=chrome
     restart: unless-stopped

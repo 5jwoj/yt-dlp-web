@@ -14,10 +14,29 @@ app = Flask(__name__)
 
 # 配置
 DOWNLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'downloads')
+COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies.txt')
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 # 存储下载任务状态
 download_tasks = {}
+
+
+def get_cookies_opts():
+    """获取 cookies 配置选项"""
+    opts = {}
+    
+    # 优先使用 cookies 文件
+    if os.path.exists(COOKIES_FILE):
+        opts['cookiefile'] = COOKIES_FILE
+        return opts
+    
+    # 从环境变量获取浏览器类型
+    browser = os.environ.get('COOKIES_FROM_BROWSER', '').lower()
+    if browser:
+        # 支持的浏览器: chrome, firefox, edge, safari, opera, brave, vivaldi, chromium
+        opts['cookiesfrombrowser'] = (browser,)
+    
+    return opts
 
 
 class DownloadLogger:
@@ -108,6 +127,9 @@ def get_video_info():
     if proxy:
         ydl_opts['proxy'] = proxy
     
+    # 添加 cookies 支持
+    ydl_opts.update(get_cookies_opts())
+    
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -187,6 +209,9 @@ def start_download():
             proxy = os.environ.get('HTTP_PROXY') or os.environ.get('HTTPS_PROXY')
             if proxy:
                 ydl_opts['proxy'] = proxy
+            
+            # 添加 cookies 支持
+            ydl_opts.update(get_cookies_opts())
             
             if audio_only:
                 ydl_opts['format'] = 'bestaudio/best'
